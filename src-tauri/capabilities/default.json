@@ -1,0 +1,69 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "enables the default permissions",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-close",
+    "window-state:default",
+    "store:default",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "gpg",
+          "cmd": "gpg",
+          "args": [{ "validator": ".*" }, { "validator": ".*" }],
+          "sidecar": false
+        },
+        {
+          "name": "gpg",
+          "cmd": "gpg",
+          "args": [{ "validator": ".*" }],
+          "sidecar": false
+        }
+      ]
+    },
+    {
+      "identifier": "fs:scope-document-recursive",
+      "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/**/*" }]
+    },
+    {
+      "identifier": "fs:allow-create",
+      "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/**/*" }]
+    },
+    {
+      "identifier": "fs:allow-read-file",
+      "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/**/*" }]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/**/*" }]
+    },
+    {
+      "identifier": "fs:allow-remove",
+      "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/**/*" }]
+    },
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/**/*" }]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/**/*" }]
+    },
+    {
+      "identifier": "fs:allow-read-dir",
+      "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/**/*" }]
+    },
+    {
+      "identifier": "fs:allow-write-text-file",
+      "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/**/*" }]
+    }
+  ]
+}

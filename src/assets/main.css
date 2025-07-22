@@ -1,0 +1,9 @@
+@import "./base.css";
+#app {
+  width: 100vw;
+  height: 100vh;
+}
+
+.el-header, .el-main, .el-aside {
+  outline: 1px solid #e0e1e3;
+}
