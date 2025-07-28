@@ -1,1 +1,0 @@
-import ImageTool from "@/packages/editorjs-image/src";

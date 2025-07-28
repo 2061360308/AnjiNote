@@ -1,219 +1,180 @@
 <script lang="ts" setup>
-import { onMounted, ref, Ref, computed, watch, markRaw, h, provide, reactive } from "vue";
-import Editor from "./components/Editor.vue";
-import FileList from "./components/FileList.vue";
-import HeaderBar from "./components/HeaderBar.vue";
-import DailyTitle from "./components/headBar/DailyTitle.vue";
-import MiniAction from "./components/headBar/MiniAction.vue";
-import SaveButton from "./components/headBar/SaveButton.vue";
-import AsideHeader from "./components/headBar/AsideHeader.vue";
+import { onMounted, ref, computed, watch, markRaw, h, provide, reactive } from 'vue'
+import type { VNode, Component } from 'vue'
+import Editor from './components/Editor.vue'
+import FileList from './components/FileList.vue'
+import HeaderBar from './components/HeaderBar.vue'
+import GuidedConfiguration from './components/GuidedConfiguration.vue'
+import { LazyStore } from '@tauri-apps/plugin-store'
+import { invoke } from '@tauri-apps/api/core'
 
-import GuidedConfiguration from "./components/GuidedConfiguration.vue";
+import DailyTitle from './components/headBar/DailyTitle.vue'
+import MiniAction from './components/headBar/MiniAction.vue'
+import SaveButton from './components/headBar/SaveButton.vue'
+import AsideHeader from './components/headBar/AsideHeader.vue'
 
-import * as globalProvide from "./globalProvide";
-import { LazyStore } from "@tauri-apps/plugin-store";
-import { invoke } from "@tauri-apps/api/core";
-
-// Store 会在 JavaScript 绑定时自动加载。
-const store = new LazyStore(".store/settings.json");
-
-Object.entries(globalProvide).forEach(([key, val]) => {
-  provide(key, val);
-});
-
-// 记录当前编辑器状态
-const editorSate = reactive({
-  filename: `${new Date().toISOString().slice(0, 10)}.daily`,  // 当前编辑打开的文件名,默认应该打开当前日期
-  editorIsReady: false,  // 编辑器是否准备就绪
-  saveFile: () => {},  // 保存文件的函数
-});
-
-provide("editorSate", editorSate);
-
-// Extend the Window interface to include the 'python' property
-declare global {
-  interface Window {
-    pywebview: {
-      api: { [key: string]: any };
-    };
-  }
+// HeaderBar 组件实例类型（根据你的实际组件结构调整）
+interface HeaderBarInstance {
+  leftComponent: Array<VNode | Component>
+  rightComponent: Array<VNode | Component>
 }
 
-const showPinAside: Ref<boolean> = ref(true);
-const showDrawerAside: Ref<boolean> = ref(false);
-const narrowWindow: Ref<boolean> = ref(false);
+const store = new LazyStore('.store/settings.json')
 
-const headerRef = ref();
+const showPinAside = ref<boolean>(true)
+const narrowWindow = ref<boolean>(false)
+const showDrawerAside = ref<boolean>(false)
 
-const dialogFormVisible = ref(false);
+const drawerVisible = computed<boolean>({
+  get() {
+    return showDrawerAside.value && narrowWindow.value
+  },
+  set(value: boolean) {
+    showDrawerAside.value = value
+  },
+})
 
-const input = ref("");
+const headerRef = ref<HeaderBarInstance | null>(null)
+const dialogFormVisible = ref<boolean>(false)
+const input = ref<string>('')
+const guidPageVisible = ref<boolean>(false)
 
-const guidPageVisible = ref(false);
-
-const checkMiniAction = () => {
-  const Mini_Action_KEY = "MINI_ACTION";
+// 标题栏组件装配逻辑
+const checkMiniAction = (): void => {
+  if (!headerRef.value) return
+  const Mini_Action_KEY = 'MINI_ACTION'
   const miniActionInstance = h(MiniAction, {
     showPinAside: showPinAside.value,
     narrowWindow: narrowWindow.value,
     key: Mini_Action_KEY,
     onToggleAside: headerToggleAside,
-  });
+  })
   const removeMiniAction = () => {
-    const index = headerRef.value.leftComponent.findIndex(
-      (v) => v.key === Mini_Action_KEY
-    );
+    const index = headerRef.value!.leftComponent.findIndex(
+      (v) => (v as VNode).key === Mini_Action_KEY,
+    )
     if (index > -1) {
-      headerRef.value.leftComponent.splice(index, 1);
-    }
-  };
-
-  const addMiniAction = () => {
-    if (!headerRef.value.leftComponent.some((v) => v.key === Mini_Action_KEY)) {
-      headerRef.value.leftComponent.unshift(markRaw(miniActionInstance));
-    }
-  };
-  if (narrowWindow.value) {
-    // 如果是窄窗口，显示 MiniAction
-    addMiniAction();
-  } else {
-    // 如果是宽窗口且固定侧边栏，移除 MiniAction
-    if (showPinAside.value) {
-      removeMiniAction();
-    } else {
-      // 如果是宽窗口且未固定侧边栏，显示 MiniAction
-      addMiniAction();
+      headerRef.value!.leftComponent.splice(index, 1)
     }
   }
-};
 
-const checkAsideHeader = () => {
-  const ASIDE_HEADER_KEY = "ASIDE_HEADER";
+  const addMiniAction = () => {
+    if (!headerRef.value!.leftComponent.some((v) => (v as VNode).key === Mini_Action_KEY)) {
+      headerRef.value!.leftComponent.unshift(markRaw(miniActionInstance))
+    }
+  }
+  if (narrowWindow.value) {
+    addMiniAction()
+  } else {
+    if (showPinAside.value) {
+      removeMiniAction()
+    } else {
+      addMiniAction()
+    }
+  }
+}
+
+const checkAsideHeader = (): void => {
+  if (!headerRef.value) return
+  const ASIDE_HEADER_KEY = 'ASIDE_HEADER'
   const asideHeaderInstance = h(AsideHeader, {
     onToggleAside: asideToggle,
     key: ASIDE_HEADER_KEY,
-  });
+  })
   if (showPinAside.value && !narrowWindow.value) {
-    // 如果固定侧边栏，显示 AsideHeader
-
-    console.log("showAsideHeader");
-    if (
-      !headerRef.value.leftComponent.some((v) => v.key === ASIDE_HEADER_KEY)
-    ) {
-      headerRef.value.leftComponent.unshift(markRaw(asideHeaderInstance));
+    if (!headerRef.value.leftComponent.some((v) => (v as VNode).key === ASIDE_HEADER_KEY)) {
+      headerRef.value.leftComponent.unshift(markRaw(asideHeaderInstance))
     }
   } else {
-    // 如果未固定侧边栏，移除 AsideHeader
     const index = headerRef.value.leftComponent.findIndex(
-      (v) => v.key === ASIDE_HEADER_KEY
-    );
+      (v) => (v as VNode).key === ASIDE_HEADER_KEY,
+    )
     if (index > -1) {
-      headerRef.value.leftComponent.splice(index, 1);
+      headerRef.value.leftComponent.splice(index, 1)
     }
   }
-};
+}
 
-const loadMainHeaderItems = () => {
-  headerRef.value.leftComponent = [];
-  headerRef.value.rightComponent = [];
+const loadMainHeaderItems = (): void => {
+  if (!headerRef.value) return
+  headerRef.value.leftComponent = []
+  headerRef.value.rightComponent = []
 
-  // 加载左侧组件
-  checkMiniAction();
-  checkAsideHeader();
+  checkMiniAction()
+  checkAsideHeader()
   headerRef.value.leftComponent.push(
     markRaw(
       h(DailyTitle, {
         onClickEditDailyTitle: () => {
-          dialogFormVisible.value = true;
+          dialogFormVisible.value = true
         },
-      })
-    )
-  );
-  headerRef.value.rightComponent.push(markRaw(SaveButton));
-};
+      }),
+    ),
+  )
+  headerRef.value.rightComponent.push(markRaw(SaveButton))
+}
 
-const loadguidPageHeaderItems = () => {
-  headerRef.value.leftComponent = [];
-  headerRef.value.rightComponent = [];
+const loadguidPageHeaderItems = (): void => {
+  if (!headerRef.value) return
+  headerRef.value.leftComponent = []
+  headerRef.value.rightComponent = []
+  headerRef.value.leftComponent.push(markRaw(DailyTitle))
+}
 
-  // 加载引导配置页面的组件
-  headerRef.value.leftComponent.push(markRaw(DailyTitle));
-};
-
-const headerToggleAside = () => {
+const headerToggleAside = (): void => {
   if (narrowWindow.value) {
-    showPinAside.value = false;
-    showDrawerAside.value = !showDrawerAside.value;
+    showPinAside.value = false
+    showDrawerAside.value = !showDrawerAside.value
   } else {
-    showDrawerAside.value = false;
-    showPinAside.value = !showPinAside.value;
+    showDrawerAside.value = false
+    showPinAside.value = !showPinAside.value
   }
+  checkMiniAction()
+  checkAsideHeader()
+}
 
-  checkMiniAction();
-  checkAsideHeader();
-};
+const asideToggle = (): void => {
+  showPinAside.value = !showPinAside.value
+  showDrawerAside.value = !showDrawerAside.value
+  checkMiniAction()
+  checkAsideHeader()
+}
 
-const asideToggle = () => {
-  showPinAside.value = !showPinAside.value;
-  showDrawerAside.value = !showDrawerAside.value;
+const handleCloseGuide = (): void => {
+  guidPageVisible.value = false
+}
 
-  checkMiniAction();
-  checkAsideHeader();
-};
-
-const drawerVisible = computed({
-  get() {
-    return showDrawerAside.value && narrowWindow.value;
-  },
-  set(value: boolean) {
-    showDrawerAside.value = value;
-  },
-});
-
-const handleCloseGuide = () => {
-  guidPageVisible.value = false;
-};
-
-const environmentCheck = async () => {
-  // 检查环境配置是否完整
-  // const isInstalled = await globalProvide.gpg.checkGpgInstalled();
-  const isInstalled = await invoke("check_gpg_installed");
-  console.log("GPG 安装状态：", isInstalled);
-
-  // 检查recipient值是否配置
-  const recipient = await store.get("recipient");
+const environmentCheck = async (): Promise<void> => {
+  const isInstalled = await invoke<boolean>('check_gpg_installed')
+  console.log('GPG 安装状态：', isInstalled)
+  const recipient = await store.get('recipient')
   if (!isInstalled || !recipient) {
-    guidPageVisible.value = true;
+    guidPageVisible.value = true
   }
-};
+}
 
 onMounted(() => {
-  // 页面宽度小于1000时自动隐藏侧边栏
   const checkWidth = () => {
-    narrowWindow.value = window.innerWidth <= 1100;
-
-    checkMiniAction();
-    checkAsideHeader();
-  };
-  checkWidth();
-  window.addEventListener("resize", checkWidth);
-
-  checkAsideHeader();
-
-  environmentCheck();
-
+    narrowWindow.value = window.innerWidth <= 1100
+    checkMiniAction()
+    checkAsideHeader()
+  }
+  checkWidth()
+  window.addEventListener('resize', checkWidth)
+  checkAsideHeader()
+  environmentCheck()
   watch(
     () => guidPageVisible.value,
     (newValue) => {
       if (newValue) {
-        loadguidPageHeaderItems();
+        loadguidPageHeaderItems()
       } else {
-        loadMainHeaderItems();
+        loadMainHeaderItems()
       }
     },
-    { immediate: true }
-  );
-});
+    { immediate: true },
+  )
+})
 </script>
 
 <template>
@@ -228,20 +189,13 @@ onMounted(() => {
       />
     </el-header>
     <el-container class="worker-container">
-      <el-aside
-        class="file-list"
-        width="280px"
-        v-show="showPinAside && !narrowWindow"
-      >
+      <el-aside class="file-list" width="280px" v-show="showPinAside && !narrowWindow">
         <FileList />
       </el-aside>
       <el-main v-if="!guidPageVisible">
         <Editor />
       </el-main>
-      <GuidedConfiguration
-        @close-guided-configuration="handleCloseGuide"
-        v-else
-      />
+      <GuidedConfiguration @close-guided-configuration="handleCloseGuide" v-else />
       <el-drawer
         class="drawer-aside"
         v-model="drawerVisible"
@@ -266,9 +220,7 @@ onMounted(() => {
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">
-          确认
-        </el-button>
+        <el-button type="primary" @click="dialogFormVisible = false"> 确认 </el-button>
       </div>
     </template>
   </el-dialog>

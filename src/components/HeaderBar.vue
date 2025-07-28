@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, Ref } from "vue";
+import { ref } from "vue";
+import type { Ref,VNode, Component } from 'vue'
 import SystemButton from "./SystemButton.vue";
 
-const leftComponent: Ref<any> = ref([]);
-const rightComponent: Ref<any> = ref([]);
+const leftComponent: Ref<Array<VNode | Component>> = ref([]);
+const rightComponent: Ref<Array<VNode | Component>> = ref([]);
 
 // 暴露组件属性
 defineExpose({

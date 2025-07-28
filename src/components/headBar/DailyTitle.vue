@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { inject } from "vue";
+import { useDailyStore } from '@/stores/daily'
 
-const editorSate = inject("editorSate");
+const dailyStore = useDailyStore();
+const editorState = dailyStore.editorState;
 
 const emit = defineEmits(["click-edit-daily-title"]);
 const editDailyTitle = () => {
@@ -10,7 +11,7 @@ const editDailyTitle = () => {
 </script>
 <template>
   <div class="daily-title" @click="editDailyTitle">
-    <span class="content">{{ editorSate.filename }}</span>
+    <span class="content">{{ editorState.filename }}</span>
     <span class="action">
       <svg
         xmlns="http://www.w3.org/2000/svg"

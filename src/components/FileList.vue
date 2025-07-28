@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { ref, watch, Ref, onMounted, inject } from "vue";
+import { ref, watch, onMounted } from "vue";
+import type { Ref } from "vue";
 import type { FilterNodeMethodFunction, TreeInstance } from "element-plus";
 import {
   exists,
@@ -7,6 +8,7 @@ import {
   readDir,
   BaseDirectory,
 } from "@tauri-apps/plugin-fs";
+import { useDailyStore } from '@/stores/daily'
 
 interface Tree {
   label: string;
@@ -16,10 +18,11 @@ interface Tree {
 const filterText = ref("");
 const treeRef = ref<TreeInstance>();
 
-const editorSate = inject("editorSate");
+const dailyStore = useDailyStore();
+const editorState = dailyStore.editorState;
 
 const handleNodeClick = (data: Tree) => {
-  editorSate.filename = data.label;
+  editorState.filename = data.label;
 };
 
 watch(filterText, (val) => {

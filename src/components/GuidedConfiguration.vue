@@ -75,7 +75,7 @@ function nextStep() {
 
 onMounted(async () => {
   checkGpg();
-  recipient.value = await store.get("recipient");
+  recipient.value = (await store.get("recipient")) ?? "";
 });
 </script>
 

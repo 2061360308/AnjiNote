@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { defineComponent, inject } from "vue";
+import { useDailyStore } from "@/stores/daily";
 
-const editorSate = inject("editorSate");
+const dailyStore = useDailyStore();
+const editorState = dailyStore.editorState;
+
 </script>
 
 <template>
-  <div class="save-action" @click="editorSate.saveFile()">
+  <div class="save-action" @click="editorState.saveFile()">
     <button class="save-button">
       <svg
         t="1752873617947"
