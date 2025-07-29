@@ -8,7 +8,7 @@ const editorState = dailyStore.editorState;
 
 <template>
   <div class="save-action" @click="editorState.saveFile()">
-    <button class="save-button">
+    <button class="save-button action">
       <svg
         t="1752873617947"
         viewBox="0 0 1024 1024"

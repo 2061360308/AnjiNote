@@ -322,6 +322,10 @@ export const useDailyStore = defineStore('daily', () => {
     saveFile: () => {},
   })
 
+  const removeDaily = async (name: string): Promise<void> => {
+    
+  }
+
   return {
     daily,
     editorState,

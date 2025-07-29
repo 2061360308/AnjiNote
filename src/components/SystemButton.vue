@@ -23,14 +23,14 @@ const windowMaximizeToggle = () => {
 
 <template>
   <div class="system-buttons-mac">
-    <div class="mac-btn close" title="关闭" @click="windowCloseClick"></div>
+    <div class="mac-btn close action" title="关闭" @click="windowCloseClick"></div>
     <div
-      class="mac-btn minimize"
+      class="mac-btn minimize action"
       title="最小化"
       @click="windowMinimizeClick"
     ></div>
     <div
-      class="mac-btn maximize"
+      class="mac-btn maximize action"
       title="最大化"
       @click="windowMaximizeToggle"
     ></div>

@@ -26,7 +26,7 @@ const emit = defineEmits(["toggle-aside"]);
     </div>
 
     <div class="create-new">
-      <button class="add-button">
+      <button class="add-button action">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="1em"

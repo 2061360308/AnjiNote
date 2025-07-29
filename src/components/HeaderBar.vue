@@ -53,9 +53,14 @@ defineExpose({
   flex-direction: row;
   gap: 8px;
   padding: 0;
+  pointer-events: none;
 
   .header-wrapper-left {
     flex: 1;
+  }
+
+  :deep(.action) {
+    pointer-events: auto;
   }
 }
 </style>

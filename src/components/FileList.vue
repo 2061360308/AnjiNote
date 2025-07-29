@@ -1,38 +1,37 @@
 <script lang="ts" setup>
-import { ref, watch, onMounted } from "vue";
-import type { Ref } from "vue";
-import type { FilterNodeMethodFunction, TreeInstance } from "element-plus";
-import {
-  exists,
-  mkdir,
-  readDir,
-  BaseDirectory,
-} from "@tauri-apps/plugin-fs";
+import { ref, watch, onMounted } from 'vue'
+import type { Ref } from 'vue'
+import type { FilterNodeMethodFunction, TreeInstance } from 'element-plus'
+import { exists, mkdir, readDir, BaseDirectory } from '@tauri-apps/plugin-fs'
 import { useDailyStore } from '@/stores/daily'
+import AddSvg from './icons/AddSvg.vue'
+import CtrlKSvg from './icons/CtrlKSvg.vue'
+import DailySvg from './icons/DailySvg.vue'
+import DeleteSvg from './icons/DeleteSvg.vue'
 
 interface Tree {
-  label: string;
-  children?: Tree[];
+  label: string
+  children?: Tree[]
 }
 
-const filterText = ref("");
-const treeRef = ref<TreeInstance>();
+const filterText = ref('')
+const treeRef = ref<TreeInstance>()
 
-const dailyStore = useDailyStore();
-const editorState = dailyStore.editorState;
+const dailyStore = useDailyStore()
+const editorState = dailyStore.editorState
 
 const handleNodeClick = (data: Tree) => {
-  editorState.filename = data.label;
-};
+  editorState.filename = data.label
+}
 
 watch(filterText, (val) => {
-  treeRef.value!.filter(val);
-});
+  treeRef.value!.filter(val)
+})
 
 const filterNode: FilterNodeMethodFunction = (value: string, data: Tree) => {
-  if (!value) return true;
-  return data.label.includes(value);
-};
+  if (!value) return true
+  return data.label.includes(value)
+}
 
 // const data: Tree[] = [
 //   {
@@ -92,45 +91,51 @@ const filterNode: FilterNodeMethodFunction = (value: string, data: Tree) => {
 //   },
 // ];
 
-const data: Ref<Tree[]> = ref([]);
+const data: Ref<Tree[]> = ref([])
 
 const _walkWorkDir = async (dir: string): Promise<Tree[]> => {
-  const treeData: Tree[] = [];
-  const entries = await readDir(dir, { baseDir: BaseDirectory.Document });
+  const treeData: Tree[] = []
+  const entries = await readDir(dir, { baseDir: BaseDirectory.Document })
   for (const entry of entries) {
-    const node: Tree = { label: entry.name };
+    const node: Tree = { label: entry.name }
     if (entry.isDirectory) {
-      node.label = entry.name;
-      node.children = await _walkWorkDir(`${dir}/${entry.name}`);
-      treeData.push(node);
+      node.label = entry.name
+      node.children = await _walkWorkDir(`${dir}/${entry.name}`)
+      treeData.push(node)
     } else if (entry.isFile) {
       // 处理文件逻辑
-      node.label = entry.name;
-      treeData.push(node);
+      node.label = entry.name
+      treeData.push(node)
     }
   }
-  return treeData;
-};
+  return treeData
+}
 
 const updateWorkDirData = async () => {
-  const existsWorkDir = await exists("DailyGPG", {
+  const existsWorkDir = await exists('DailyGPG', {
     baseDir: BaseDirectory.Document,
-  });
+  })
   if (!existsWorkDir) {
-    await mkdir("DailyGPG", { baseDir: BaseDirectory.Document });
+    await mkdir('DailyGPG', { baseDir: BaseDirectory.Document })
   }
-  data.value = await _walkWorkDir("DailyGPG");
-};
+  data.value = await _walkWorkDir('DailyGPG')
+}
 
 const defaultProps = {
-  children: "children",
-  label: "label",
-};
+  children: 'children',
+  label: 'label',
+}
+
+const removeNode = (event: MouseEvent, data: Tree) => {
+  event.stopPropagation()
+  const name = data.label
+  console.log('Removing Daily:', name)
+}
 
 onMounted(() => {
   // 初始化树形数据
-  updateWorkDirData();
-});
+  updateWorkDirData()
+})
 </script>
 
 <template>
@@ -139,62 +144,13 @@ onMounted(() => {
       <div class="sticky-bar">
         <div class="create-new">
           <button class="add-button">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="1em"
-              height="1em"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="currentColor"
-                d="M12 2a1 1 0 0 0-1 1v8H3a1 1 0 1 0 0 2h8v8a1 1 0 1 0 2 0v-8h8a1 1 0 1 0 0-2h-8V3a1 1 0 0 0-1-1"
-              ></path>
-            </svg>
+            <AddSvg />
             <div>新内容</div>
           </button>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="37"
-            height="14"
-            fill="none"
-            viewBox="0 0 37 14"
-            class="short-cut-h4NtnU"
-          >
-            <rect
-              width="22.3"
-              height="12.3"
-              x="0.35"
-              y="0.85"
-              stroke="currentColor"
-              stroke-width="0.7"
-              rx="1.65"
-            ></rect>
-            <path
-              fill="currentColor"
-              d="M6.97 10.666c-1.913 0-3.11-1.416-3.11-3.682v-.01c0-2.27 1.192-3.686 3.106-3.686 1.484 0 2.642.933 2.852 2.285l-.005.01h-.884l-.005-.01C8.69 4.67 7.938 4.1 6.966 4.1c-1.353 0-2.202 1.113-2.202 2.876v.01c0 1.762.85 2.87 2.207 2.87.981 0 1.728-.502 1.948-1.313l.01-.01h.889v.01c-.235 1.289-1.348 2.124-2.847 2.124m5.885-.127c-1.084 0-1.538-.4-1.538-1.406V5.939h-.83v-.703h.83V3.874h.879v1.362h1.152v.703h-1.152v2.979c0 .62.215.87.761.87.152 0 .235-.006.391-.02v.722c-.166.03-.327.05-.493.05m1.563-.039V5.236h.85v.782h.077c.2-.552.694-.874 1.407-.874.16 0 .341.02.424.034v.825a3 3 0 0 0-.522-.049c-.81 0-1.387.513-1.387 1.284V10.5zm3.657 0V3.146h.85V10.5z"
-            ></path>
-            <rect
-              width="12.3"
-              height="12.3"
-              x="24.35"
-              y="0.85"
-              stroke="currentColor"
-              stroke-width="0.7"
-              rx="1.65"
-            ></rect>
-            <path
-              fill="currentColor"
-              d="M28.103 10.5V3.454h.878v3.423h.079l3.085-3.423h1.104l-2.817 3.042 3.076 4.004H32.37l-2.544-3.394-.845.933V10.5z"
-            ></path>
-          </svg>
+          <CtrlKSvg />
         </div>
 
-        <el-input
-          v-model="filterText"
-          class="filter-input"
-          placeholder="Filter keyword"
-        />
+        <el-input v-model="filterText" class="filter-input" placeholder="Filter keyword" />
       </div>
 
       <el-tree
@@ -203,7 +159,21 @@ onMounted(() => {
         :props="defaultProps"
         @node-click="handleNodeClick"
         :filter-node-method="filterNode"
-      />
+      >
+        <template #default="{ node, data }">
+          <div class="tree-node">
+            <div class="content">
+              <DailySvg style="font-size: 10px;" />
+              <span>{{ node.label }}</span>
+            </div>
+            <div>
+              <el-button class="remove-button" link @click="removeNode($event, data)">
+                <DeleteSvg style="font-size: 10px;" />
+              </el-button>
+            </div>
+          </div>
+        </template>
+      </el-tree>
     </el-main>
   </el-container>
 </template>
@@ -285,5 +255,28 @@ onMounted(() => {
       }
     }
   }
+}
+
+.tree-node{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  width: 100%;
+  height: 100%;
+
+  .content{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .remove-button {
+    display: none;
+  }
+}
+
+.tree-node:hover .remove-button {
+  display: block;
 }
 </style>

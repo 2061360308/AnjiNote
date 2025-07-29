@@ -8,9 +8,14 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AddSvg: typeof import('./src/components/icons/AddSvg.vue')['default']
     AsideHeader: typeof import('./src/components/headBar/AsideHeader.vue')['default']
+    CtrlKSvg: typeof import('./src/components/icons/CtrlKSvg.vue')['default']
+    DailySvg: typeof import('./src/components/icons/DailySvg.vue')['default']
     DailyTitle: typeof import('./src/components/headBar/DailyTitle.vue')['default']
+    DeleteSvg: typeof import('./src/components/icons/DeleteSvg.vue')['default']
     Editor: typeof import('./src/components/Editor.vue')['default']
+    Editor2: typeof import('./src/components/Editor2.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -24,10 +29,12 @@ declare module 'vue' {
     ElSkeleton: typeof import('element-plus/es')['ElSkeleton']
     ElTree: typeof import('element-plus/es')['ElTree']
     FileList: typeof import('./src/components/FileList.vue')['default']
+    GpgSvg: typeof import('./src/components/icons/GpgSvg.vue')['default']
     GuidedConfiguration: typeof import('./src/components/GuidedConfiguration.vue')['default']
     HeaderBar: typeof import('./src/components/HeaderBar.vue')['default']
     MiniAction: typeof import('./src/components/headBar/MiniAction.vue')['default']
     SaveButton: typeof import('./src/components/headBar/SaveButton.vue')['default']
     SystemButton: typeof import('./src/components/SystemButton.vue')['default']
+    ToggleMenuSvg: typeof import('./src/components/icons/ToggleMenuSvg.vue')['default']
   }
 }
